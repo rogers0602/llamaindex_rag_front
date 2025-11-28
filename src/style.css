@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 简单的全局样式 */
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  background-color: #f8fafc; /* slate-50 */
+}
