@@ -1,6 +1,13 @@
 import { createApp } from 'vue'
-import './style.css' // 引入 Tailwind
+import './style.css'
 import App from './App.vue'
-import router from './router' // 引入路由
+import router from './router'
+import { useAuth } from './composables/useAuth'
 
-createApp(App).use(router).mount('#app')
+const app = createApp(App)
+
+
+const { initAuth } = useAuth()
+initAuth()
+
+app.use(router).mount('#app')

@@ -1,5 +1,8 @@
 import { ref, watch } from 'vue'
 import { useWorkspace } from './useWorkspace'
+import { useAuth } from './useAuth'
+
+const { user } = useAuth()
 
 export function useDocuments() {
   const { currentWorkspace } = useWorkspace()
@@ -17,7 +20,10 @@ export function useDocuments() {
       // 构造请求 URL，带上 workspace_id 参数
       const url = `http://localhost:8000/api/documents?workspace_id=${currentWorkspace.value.id}`
       
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${user.value.token}` }
+      })
       if (!res.ok) throw new Error('获取列表失败')
       
       const data = await res.json()
@@ -38,31 +44,33 @@ export function useDocuments() {
   }, { immediate: true })
 
   // 3. 上传文件 (修改版：上传完自动刷新)
-  const uploadFile = async (file, targetWorkspaceId = null) => {
-    if (!file) return
+  const uploadFile = async (file, isPublic = false) => {
     isUploading.value = true
-
-    const finalWorkspaceId = targetWorkspaceId || currentWorkspace.value.id
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('workspace_id', finalWorkspaceId)
+    
+    // 🔥 关键：必须显式添加 is_public 字段
+    // 后端 FastAPI 用 is_public: bool = Form(False) 接收
+    formData.append('is_public', isPublic) 
 
     try {
       const res = await fetch('http://localhost:8000/api/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.value.token}`
+        },
         body: formData
       })
-      
-      if (!res.ok) throw new Error('上传失败')
-      const data = await res.json()
-      
-      // ✅ 关键：上传成功后，重新拉取最新的列表
-      await fetchDocuments()
-      
-      return data.filename
-    } catch (error) {
-      console.error(error)
-      throw error
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.detail || '上传失败')
+      }
+
+      // 上传成功后刷新列表
+      // 注意：这里需要根据逻辑决定是否重新 fetch，或者由组件控制
+      // 简单起见，这里返回 filename
+      return file.name
     } finally {
       isUploading.value = false
     }

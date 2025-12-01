@@ -18,13 +18,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Sidebar from '../components/Sidebar.vue'
 import ChatView from '../components/ChatView.vue'
 import KnowledgeBase from '../components/KnowledgeBase.vue'
 import SettingsView from '../components/SettingsView.vue'
+import DepartmentView from './DepartmentView.vue'
+import UserManageView from './UserManageView.vue'
 
-const activeTab = ref('chat')
+// 从 localStorage 恢复上次的活动标签页，默认是 'chat'
+const activeTab = ref(localStorage.getItem('activeTab') || 'chat')
+
+// 监听 activeTab 变化并保存到 localStorage
+watch(activeTab, (newTab) => {
+  localStorage.setItem('activeTab', newTab)
+})
 
 // 根据 tab 动态返回组件
 const currentView = computed(() => {
@@ -32,6 +40,8 @@ const currentView = computed(() => {
     case 'chat': return ChatView
     case 'knowledge': return KnowledgeBase
     case 'settings': return SettingsView
+    case 'departments': return DepartmentView
+    case 'users': return UserManageView
     default: return ChatView
   }
 })
