@@ -194,6 +194,11 @@
       alert("两次输入的密码不一致，请重新输入")
       return
     }
+
+    if (form.password.length < 6) {
+      alert("密码至少需要6位")
+      return
+    }
     
     const payload = {
       username: form.username,
