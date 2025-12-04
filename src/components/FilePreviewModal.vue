@@ -41,7 +41,7 @@
           <!-- 情况 C: 不支持的格式 -->
           <div v-else class="flex flex-col items-center justify-center h-full text-slate-400">
             <FileQuestion class="w-16 h-16 mb-4" />
-            <p>正在加载或格式不支持预览</p>
+            <p>正在加载/格式不支持预览/文件不存在</p>
           </div>
 
         </div>
