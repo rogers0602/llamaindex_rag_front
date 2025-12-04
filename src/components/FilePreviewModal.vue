@@ -145,75 +145,72 @@
     console.error('PDF Render Error:', err)
   }
   
-  // PDF 高亮逻辑
-  // === PDF 高亮核心逻辑 (指纹模糊匹配) ===
+  // === 辅助函数：暴力清洗文本 ===
+  // 只保留汉字、字母、数字。去掉所有标点、空格、特殊符号
+  const normalizeText = (str) => {
+    if (!str) return ''
+    return str
+      .toLowerCase()
+      .replace(/\s+/g, '') // 去除所有空白
+      .replace(/[，。！？：；“”‘’（）,\.!:;"'()]/g, '') // 去除中英文标点
+      .replace(/[\u200B-\u200D\uFEFF]/g, '') // 去除不可见字符
+  }
+  
+  // === PDF 高亮核心逻辑 (生产环境版) ===
   const onPdfRendered = () => {
     if (!props.highlightText) return
   
-    // 延迟执行，等待 DOM 生成
-    setTimeout(() => {
+    let attempt = 0
+    const maxAttempts = 10 
+  
+    const tryHighlight = () => {
+      attempt++
       const textLayer = document.querySelector('.textLayer')
-      if (!textLayer) {
-        console.warn('TextLayer 未加载')
+      
+      // 如果 DOM 还没准备好，重试
+      if (!textLayer || textLayer.querySelectorAll('span').length === 0) {
+        if (attempt < maxAttempts) {
+          setTimeout(tryHighlight, 500)
+        }
         return
       }
   
       const spans = textLayer.querySelectorAll('span')
-      if (spans.length === 0) return
-  
-      // 1. 预处理目标文本 (指纹提取)
-      // 去除所有空白字符(空格、换行)，转小写
-      const cleanHighlight = props.highlightText.replace(/\s+/g, '').toLowerCase()
+      const cleanChunk = normalizeText(props.highlightText)
       
-      // 如果目标太短，不处理防止误标
-      if (cleanHighlight.length < 5) return
+      if (cleanChunk.length < 2) return
   
-      // 提取“特征指纹”：取前 20 个字符作为搜索锚点
-      // 只要找到这开头的一句话，就定位过去
-      const fingerprint = cleanHighlight.substring(0, 20)
+      let matchCount = 0
+      let firstMatch = null
   
-      console.log('目标指纹:', fingerprint)
-  
-      let found = false
-  
-      // 2. 遍历 PDF 的所有文本块
       for (const span of spans) {
-        // 同样处理 PDF span 里的文本
-        const cleanSpan = span.textContent.replace(/\s+/g, '').toLowerCase()
+        const cleanSpan = normalizeText(span.textContent)
   
-        // 情况 A: Span 包含 指纹 (Span 很长)
-        // 情况 B: 指纹 包含 Span (Span 很短，只是句子的一部分)
-        
-        // 我们主要寻找“开始位置”
-        // 如果 span 的内容足够长，包含指纹 -> 命中
-        // 如果 span 很短（比如只显示了几个字），检查它是否是指纹的开头 -> 命中
-        
-        const isMatch = cleanSpan.includes(fingerprint) || 
-                        (cleanSpan.length > 5 && fingerprint.startsWith(cleanSpan))
+        // 跳过过短的碎片(防误伤)，但保留数字(如"120")
+        // 如果全是数字，长度>1即可；如果是文字，建议>1
+        if (cleanSpan.length < 2) continue
   
-        if (isMatch) {
-          // --- 找到目标，应用高亮样式 ---
+        // 核心匹配：只要 Chunk 包含这个 Span，说明这个 Span 属于引用段落的一部分
+        if (cleanChunk.includes(cleanSpan)) {
+          // 应用高亮样式
+          span.style.backgroundColor = 'rgba(255, 235, 59, 0.5)' // 亮黄背景
+          span.style.borderRadius = '2px'
+          span.style.cursor = 'help' // 鼠标放上去变问号/手型
+          span.title = "引用来源片段" // 鼠标悬停提示
           
-          // 1. 强力高亮背景
-          span.style.backgroundColor = 'rgba(255, 235, 59, 0.6)' // 亮黄色
-          span.style.borderRadius = '4px'
-          
-          // 2. 加个边框让它更显眼
-          span.style.borderBottom = '2px solid red'
-          
-          // 3. 滚动到视野中间
-          span.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          
-          console.log('✅ 高亮定位成功:', span.textContent)
-          found = true
-          break // 找到开头就行，不用全文高亮（全文跨 span 高亮技术复杂度极高）
+          if (!firstMatch) firstMatch = span
+          matchCount++
         }
       }
   
-      if (!found) {
-        console.warn('❌ 未找到匹配段落。可能是 PDF 解析乱码或分页截断。')
+      // 滚动到第一个匹配点
+      if (firstMatch) {
+        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    }, 1000) // 这里的延迟很重要，PDF.js 渲染文字层比较慢
+    }
+  
+    // 启动高亮流程
+    tryHighlight()
   }
   
   const close = () => {
