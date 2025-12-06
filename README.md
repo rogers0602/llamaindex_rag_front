@@ -115,7 +115,8 @@ src/
 - 支持桌面端和移动端
 - 自适应布局和交互
 
-## 🔧 开发指南
+## 🔧 部署
+搭配后端一起使用：https://github.com/rogers0602/llamaindex_rag
 
 ### 代码规范
 - 使用 Vue 3 Composition API
