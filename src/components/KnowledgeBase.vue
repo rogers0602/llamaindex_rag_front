@@ -1,3 +1,13 @@
+<!--
+  知识库管理组件
+
+  提供文档上传、管理、删除等功能界面
+  支持文件类型识别、权限控制、批量操作等特性
+
+  @author Guo Lijian
+  @version 1.0.0
+  @since 2025-12-06
+-->
 <template>
   <div class="h-full p-8 overflow-y-auto">
     <div class="max-w-5xl mx-auto">

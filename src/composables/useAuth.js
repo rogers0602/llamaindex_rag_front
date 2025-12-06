@@ -1,3 +1,14 @@
+/**
+ * 用户认证管理模块
+ *
+ * 该模块提供用户登录、登出、权限验证等核心认证功能
+ * 负责管理用户状态、Token存储、路由守卫等
+ *
+ * @author Guo Lijian
+ * @version 1.0.0
+ * @since 2025-12-06
+ */
+
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWorkspace } from './useWorkspace'

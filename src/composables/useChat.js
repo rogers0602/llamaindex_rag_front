@@ -1,3 +1,14 @@
+/**
+ * 聊天功能管理模块
+ *
+ * 处理与AI助手的对话交互，包括消息发送、流式响应处理
+ * 管理聊天历史、文件引用展示、打字机效果等
+ *
+ * @author Guo Lijian
+ * @version 1.0.0
+ * @since 2025-12-06
+ */
+
 import { ref } from 'vue'
 import { useWorkspace } from './useWorkspace'
 import { useAuth } from './useAuth'

@@ -1,3 +1,13 @@
+<!--
+  文件预览模态框组件
+
+  支持多种文件类型的在线预览功能，包括PDF、图片、文本等
+  提供文件下载、缩放控制、全屏显示等交互功能
+
+  @author Guo Lijian
+  @version 1.0.0
+  @since 2025-12-06
+-->
 <template>
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <!-- 弹窗容器 -->

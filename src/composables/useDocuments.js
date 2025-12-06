@@ -1,3 +1,14 @@
+/**
+ * 文档管理模块
+ *
+ * 负责文档的上传、列表获取、删除等操作
+ * 管理文档状态、工作区关联、权限控制等功能
+ *
+ * @author Guo Lijian
+ * @version 1.0.0
+ * @since 2025-12-06
+ */
+
 import { ref, watch } from 'vue'
 import { useWorkspace } from './useWorkspace'
 import { useAuth } from './useAuth'

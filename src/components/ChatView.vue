@@ -1,3 +1,13 @@
+<!--
+  智能问答聊天组件
+
+  提供与AI助手的实时对话界面，支持流式文本显示
+  包含消息历史、文件引用展示、打字机效果等功能
+
+  @author Guo Lijian
+  @version 1.0.0
+  @since 2025-12-06
+-->
 <template>
   <div class="flex flex-col h-full bg-slate-50">
     <header class="h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm shrink-0">
