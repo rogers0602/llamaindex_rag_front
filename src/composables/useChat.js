@@ -142,21 +142,20 @@ export function useChat() {
           try {
             const msg = JSON.parse(line)
             
-            if (messages.value[aiMsgIndex].thinking) {
-              messages.value[aiMsgIndex].thinking = false
-            }
-            
-            // 🔥 收到新 Session ID
             if (msg.type === 'session_id') {
               currentSessionId.value = msg.data
               localStorage.setItem('last_session_id', msg.data)
-              // 不用 await，让它在后台刷就行
               fetchSessions()
             }
             else if (msg.type === 'sources') {
               messages.value[aiMsgIndex].sources = msg.data
+              // 注意：收到 sources 时不要关 thinking，让用户知道还在生成正文
             } 
             else if (msg.type === 'content') {
+              // ✅ 修改点：只有收到正文内容时，才停止思考动画
+              if (messages.value[aiMsgIndex].thinking) {
+                messages.value[aiMsgIndex].thinking = false
+              }
               messages.value[aiMsgIndex].content += msg.data
               await new Promise(r => requestAnimationFrame(r))
             }
@@ -165,7 +164,13 @@ export function useChat() {
           }
         }
       }
-      // 结束后刷新列表以更新时间排序
+
+      // ✅ 兜底：流结束后，如果还在思考（比如后端没返回content），强制关闭
+      if (messages.value[aiMsgIndex].thinking) {
+        messages.value[aiMsgIndex].thinking = false
+      }
+
+      // 结束后刷新列表
       await fetchSessions()
   
     } catch (error) {

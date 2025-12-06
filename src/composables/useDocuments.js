@@ -54,7 +54,7 @@ export function useDocuments() {
     formData.append('is_public', isPublic) 
 
     try {
-      const res = await fetch('http://localhost:8000/api/upload', {
+      const res = await fetch('http://localhost:8000/api/documents/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.value.token}`

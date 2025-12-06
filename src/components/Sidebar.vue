@@ -136,7 +136,10 @@
 // 🔥🔥🔥 修正点：所有 import 必须在最顶部
 import { computed, ref, reactive, onMounted } from 'vue' 
 import { useRouter } from 'vue-router'
-import { Bot, MessageSquare, Database, Building2, LogOut, Users, Key, Trash2 } from 'lucide-vue-next'
+import { 
+  Bot, MessageSquare, Database, Building2, LogOut, Users, Key, Trash2,
+  LayoutDashboard 
+ } from 'lucide-vue-next'
 import { useWorkspace } from '../composables/useWorkspace'
 import { useAuth } from '../composables/useAuth'
 import { useChat } from '../composables/useChat' // 引入 useChat
@@ -150,6 +153,7 @@ const { user, logout } = useAuth()
 const { sessionList, fetchSessions, loadSession, createNewSession, deleteSession, currentSessionId } = useChat()
 
 const allTabs = [
+  { id: 'home', label: '系统概览', icon: LayoutDashboard, roles: ['admin', 'member'] },
   { id: 'chat', label: '智能问答', icon: MessageSquare, roles: ['admin', 'member'] },
   { id: 'knowledge', label: '知识库管理', icon: Database, roles: ['admin', 'member'] },
   { id: 'departments', label: '部门管理', icon: Building2, roles: ['admin'] },

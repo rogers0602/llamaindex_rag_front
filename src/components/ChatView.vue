@@ -13,18 +13,12 @@
         :class="['flex', msg.role === 'user' ? 'justify-end' : 'justify-start']">
         <div
           :class="['max-w-2xl p-4 rounded-lg shadow-sm', msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-slate-800 border']">
-          
-          <div v-if="msg.thinking" class="flex items-center gap-2 text-slate-400 text-sm py-2">
-            <Loader2 class="w-4 h-4 animate-spin" />
-            <span>深度检索中...</span>
-          </div>
-          
-          <div v-else class="relative group">
-            <div 
-              class="leading-relaxed prose prose-sm max-w-none min-h-[20px] select-text cursor-text" 
-              :class="msg.role === 'user' ? 'prose-invert' : ''"
-              v-html="md.render(msg.content || '')"
-            ></div>
+          <div v-if="msg.content" class="relative group mb-2">
+             <div 
+               class="leading-relaxed prose prose-sm max-w-none select-text cursor-text" 
+               :class="msg.role === 'user' ? 'prose-invert' : ''"
+               v-html="md.render(msg.content || '')"
+             ></div>
             <button 
               v-if="msg.role === 'assistant'"
               @click="copyToClipboard(msg.content, idx)"
@@ -37,15 +31,22 @@
               <span v-else>复制</span>
             </button>
           </div>
-          
+          <!-- 即使 sources 出来了，这里依然在转圈，用户就知道还没完 -->
+          <div v-if="msg.thinking" class="flex items-center gap-2 text-slate-400 text-sm py-1">
+            <Loader2 class="w-4 h-4 animate-spin" />
+            <span>{{ msg.content ? '正在生成...' : '深度检索中...' }}</span>
+          </div>
           <div v-if="msg.role === 'assistant' && msg.sources && !msg.thinking" class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
             <p class="font-semibold mb-1 text-slate-700">引用来源:</p>
             <div v-if="msg.sources.length > 0" class="space-y-1">
               <div 
                 v-for="(s, i) in msg.sources" :key="i" 
                 @click="openPreview(s)" 
-                class="flex items-center gap-1 text-slate-600 hover:text-blue-600 cursor-pointer transition">
-                <FileText class="w-3 h-3 text-blue-500" /> 
+                class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer transition group/file">
+                <component 
+                  :is="getFileIcon(s.file_name || s).icon" 
+                  :class="['w-4 h-4', getFileIcon(s.file_name || s).color]" 
+                />
                 <!-- 如果 s 是对象显示 s.file_name，如果是字符串显示 s -->
                 <span class="hover:underline">{{ s.file_name || s }}</span>
               </div>
@@ -84,7 +85,10 @@
 <script setup>
 // 🔥🔥🔥 修正点：补全 onMounted
 import { ref, watch, nextTick, onMounted } from 'vue' 
-import { MessageSquare, Send, FileText, Loader2, Copy, Check } from 'lucide-vue-next'
+import { 
+  MessageSquare, Send, FileText, Loader2, Copy, Check,
+  FileSpreadsheet, FileCode, File, FileImage
+ } from 'lucide-vue-next'
 import { useChat } from '../composables/useChat'
 import { useWorkspace } from '../composables/useWorkspace'
 import MarkdownIt from 'markdown-it'
@@ -140,6 +144,38 @@ const scrollToBottom = async (smooth = true) => {
     } else {
       el.scrollTop = el.scrollHeight
     }
+  }
+}
+
+const getFileIcon = (filename) => {
+  if (!filename) return { icon: File, color: 'text-slate-400' }
+  
+  const ext = filename.split('.').pop().toLowerCase()
+
+  switch (ext) {
+    case 'pdf':
+      return { icon: FileText, color: 'text-red-500' } // PDF 用红色
+    case 'doc':
+    case 'docx':
+      return { icon: FileText, color: 'text-blue-500' } // Word 用蓝色
+    case 'xls':
+    case 'xlsx':
+    case 'csv':
+      return { icon: FileSpreadsheet, color: 'text-green-600' } // Excel 用绿色
+    case 'ppt':
+    case 'pptx':
+      return { icon: File, color: 'text-orange-500' } // PPT 用橙色
+    case 'txt':
+    case 'md':
+    case 'json':
+    case 'py':
+      return { icon: FileCode, color: 'text-slate-600' } // 代码/文本用深灰
+    case 'jpg':
+    case 'png':
+    case 'jpeg':
+      return { icon: FileImage, color: 'text-purple-500' } // 图片用紫色
+    default:
+      return { icon: File, color: 'text-slate-400' } // 未知格式
   }
 }
 

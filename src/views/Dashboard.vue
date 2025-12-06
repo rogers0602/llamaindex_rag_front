@@ -11,7 +11,10 @@
     <main class="flex-1 h-full relative overflow-hidden">
       <!-- 动态组件切换 -->
       <KeepAlive>
-        <component :is="currentView" />
+        <component 
+          :is="currentView" 
+          @switch-tab="(tab) => activeTab = tab"
+        />
       </KeepAlive>
     </main>
   </div>
@@ -25,24 +28,24 @@ import KnowledgeBase from '../components/KnowledgeBase.vue'
 import SettingsView from '../components/SettingsView.vue'
 import DepartmentView from './DepartmentView.vue'
 import UserManageView from './UserManageView.vue'
+import DashboardHome from './DashboardHome.vue' 
 
-// 从 localStorage 恢复上次的活动标签页，默认是 'chat'
-const activeTab = ref(localStorage.getItem('activeTab') || 'chat')
+// 默认进入 'home'
+const activeTab = ref(localStorage.getItem('activeTab') || 'home')
 
-// 监听 activeTab 变化并保存到 localStorage
 watch(activeTab, (newTab) => {
   localStorage.setItem('activeTab', newTab)
 })
 
-// 根据 tab 动态返回组件
 const currentView = computed(() => {
   switch (activeTab.value) {
+    case 'home': return DashboardHome
     case 'chat': return ChatView
     case 'knowledge': return KnowledgeBase
     case 'settings': return SettingsView
     case 'departments': return DepartmentView
     case 'users': return UserManageView
-    default: return ChatView
+    default: return DashboardHome
   }
 })
 </script>

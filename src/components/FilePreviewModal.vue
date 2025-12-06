@@ -118,7 +118,13 @@
           if (data.type === 'text') {
             fileType.value = 'text'
             textContent.value = data.content
-            nextTick(() => scrollToHighlight('mark'))
+            // 数据变化后，等待 DOM 更新，然后滚动
+            nextTick(() => {
+              // 这里稍作延迟，确保 v-html 渲染完毕
+              setTimeout(() => {
+                scrollToHighlight('#txt-mark')
+              }, 100)
+            })
             return
           }
         } catch (e) {}
@@ -130,11 +136,39 @@
     }
   }
   
+  // === 辅助函数：转义正则特殊字符 ===
+  const escapeRegExp = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
+  }
+  
+  // === 文本高亮逻辑 (升级版：模糊正则) ===
   const highlightedHtml = computed(() => {
     if (!props.highlightText || !textContent.value) return textContent.value
-    const chunk = props.highlightText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const regex = new RegExp(`(${chunk})`, 'gi')
-    return textContent.value.replace(regex, '<mark class="bg-yellow-200 text-slate-900 px-1 rounded">$1</mark>')
+    
+    // 1. 获取纯净的指纹 (只取前 50 个有效字符作为锚点，防止正则太长炸掉)
+    // 我们不匹配全文，只匹配“开头部分”，让用户能定位到即可
+    const cleanSource = props.highlightText.replace(/\s+/g, '').substring(0, 50)
+    
+    if (cleanSource.length < 2) return textContent.value
+  
+    // 2. 构建“宽容”的正则
+    // 逻辑：在每个核心字符之间，允许出现任意数量的 空白符、换行符 或 标点
+    // 比如目标是 "AB"，正则变成 "A[\s\p{P}]*B" (伪代码)
+    
+    const chars = cleanSource.split('')
+    // 构建正则字符串：字符 + 允许的干扰项
+    // [^a-zA-Z0-9\u4e00-\u9fa5]* 表示允许中间夹杂非文字的内容（如空格、换行、特殊符号）
+    const pattern = chars.map(c => escapeRegExp(c)).join('[^a-zA-Z0-9\\u4e00-\\u9fa5]*')
+    
+    try {
+      // 3. 执行替换
+      // (<mark...>$&</mark>) $& 代表匹配到的原始内容（保留原有的换行和空格）
+      const regex = new RegExp(`(${pattern})`, 'i') // 'i' 忽略大小写
+      return textContent.value.replace(regex, '<mark id="txt-mark" class="bg-yellow-200 text-slate-900 px-1 rounded border-b-2 border-red-400 font-bold">$1</mark>')
+    } catch (e) {
+      console.warn('正则构建失败，降级为普通显示', e)
+      return textContent.value
+    }
   })
   
   const onPdfLoaded = () => {
