@@ -16,8 +16,10 @@
         <!-- 头部 -->
         <div class="h-14 border-b flex items-center justify-between px-6 bg-slate-50 shrink-0">
           <h3 class="font-bold text-slate-700 truncate max-w-md">{{ fileName }}</h3>
-          <a v-if="fileUrl" :href="fileUrl" download class="mt-4 text-blue-600 hover:underline">点击下载原文件</a>
           <div class="flex items-center gap-4">
+            <a v-if="fileUrl" :href="fileUrl" :download="fileName" class="text-sm text-blue-600 hover:underline cursor-pointer">
+              下载原文件
+            </a>
             <!-- 命中提示 -->
             <div v-if="highlightText" class="text-xs px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full border border-yellow-200">
               定位引用: {{ highlightText.slice(0, 15) }}...
@@ -99,10 +101,10 @@
   })
   
   // 加载文件
+  // 加载文件
   const loadFile = async () => {
     try {
       const wsId = props.docWorkspaceId || 'global'
-      // 这里的参数名根据你后端的实际情况（doc_workspace_id 或 workspace_id）
       const url = `http://localhost:8000/api/files/${props.fileName}?doc_workspace_id=${wsId}`
       
       console.log('Requesting:', url) 
@@ -113,32 +115,45 @@
       
       if (!res.ok) throw new Error(`Status: ${res.status}`)
   
+      // 先获取 Content-Type 用于初步判断
       const contentType = res.headers.get('content-type') || ''
-      const isPdfHeader = contentType.includes('application/pdf')
-      const isPdfExt = props.fileName.toLowerCase().endsWith('.pdf')
-  
-      if (isPdfHeader || isPdfExt) {
+      const isPdf = contentType.includes('application/pdf') || props.fileName.toLowerCase().endsWith('.pdf')
+
+      // === 分支处理 ===
+      
+      if (isPdf) {
+        // 1. 如果是 PDF，后端返回的是二进制流，直接用
         const blob = await res.blob()
         fileUrl.value = URL.createObjectURL(blob)
         fileType.value = 'pdf'
       } else {
-        const clone = res.clone()
+        // 2. 如果不是 PDF，尝试作为 JSON 解析 (文本文件后端会包装成 JSON)
+        const clone = res.clone() // 克隆流，因为读取一次就没了
+        
         try {
           const data = await clone.json()
-          if (data.type === 'text') {
+          
+          if (data && data.type === 'text') {
+            // ✅ 情况 A: 后端返回了包装好的 JSON (为了高亮)
             fileType.value = 'text'
-            textContent.value = data.content
-            // 数据变化后，等待 DOM 更新，然后滚动
-            nextTick(() => {
-              // 这里稍作延迟，确保 v-html 渲染完毕
-              setTimeout(() => {
-                scrollToHighlight('#txt-mark')
-              }, 100)
-            })
-            return
+            textContent.value = data.content // 预览用
+            
+            // 🔥🔥🔥 核心修复：下载链接不能用 JSON，要用 content 重建纯文本 Blob 🔥🔥🔥
+            const txtBlob = new Blob([data.content], { type: 'text/plain;charset=utf-8' })
+            fileUrl.value = URL.createObjectURL(txtBlob)
+            
+            nextTick(() => scrollToHighlight('#txt-mark'))
+          } else {
+            // 不是我们要的格式，抛出异常进入下方 catch
+            throw new Error('Not wrapper json') 
           }
-        } catch (e) {}
-        fileType.value = 'unknown' 
+        } catch (e) {
+          // ✅ 情况 B: 后端返回的是普通二进制文件 (图片、Word等)
+          // 此时 clone.json() 会失败，我们回退使用原始 res.blob()
+          const blob = await res.blob()
+          fileUrl.value = URL.createObjectURL(blob)
+          fileType.value = 'unknown' // 显示默认的下载界面
+        }
       }
     } catch (e) {
       console.error('Preview Error:', e)

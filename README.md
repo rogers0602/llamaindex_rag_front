@@ -1,3 +1,46 @@
+---
+
+# 🛡️ Enterprise RAG Knowledge Base (前端系统)
+
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![LlamaIndex](https://img.shields.io/badge/LlamaIndex-0.10+-BC31EA.svg?style=flat)](https://www.llamaindex.ai/)
+[![Ollama](https://img.shields.io/badge/Ollama-0.3+-000000.svg?style=flat&logo=ollama&logoColor=white)](https://ollama.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+
+> **🚀 一个专为数据安全敏感型企业打造的私有化 RAG（检索增强生成）知识库系统。**
+> 
+> 全链路离线运行，无需互联网连接。集成了 LDAP 统一认证、细粒度 RBAC 权限控制、多租户隔离、精准的文档溯源高亮以及可视化的数据仪表盘。
+
+---
+
+## 🌟 核心亮点 (Key Features)
+
+### 1. 🛡️ 极致的私有化与安全
+*   **纯离线部署 (Air-Gapped)**：所有模型（LLM, Embedding, Rerank）及依赖库均内置于本地或 Docker 镜像中，物理断网环境下依然全功能运行。
+*   **数据不出域**：向量数据存储于本地 PostgreSQL (pgvector)，源文件加密存储，杜绝第三方 API 数据泄露风险。
+
+### 2. 🔐 严苛的企业级权限体系
+*   **多租户数据隔离**：基于 `Workspace` 的物理级隔离策略。研发部的技术文档，财务部无法检索，从底层向量索引层面保障数据边界。
+*   **RBAC 权限控制**：内置 Admin/Member 角色体系，支持精细化的部门管理和人员管理。
+*   **双模认证 (Hybrid Auth)**：无缝集成 **Local + LDAP/AD**。企业域账号直接登录，自动同步组织架构与部门信息。
+
+### 3. 🧠 经实战验证的混合模型架构
+我们不盲目追求大参数，而是追求**效果与资源的最佳平衡**：
+*   **LLM (Ollama)**：选用 **Qwen2.5** 系列。在中文理解、指令遵循上表现优异，且资源占用低。
+*   **Embedding (Ollama)**：选用 **BAAI/bge-m3**。支持 **8192** 超长上下文（完美适配长文档切片），具备 SOTA 级别的多语言与中文检索能力。
+*   **Rerank (Local Python)**：内置 **BAAI/bge-reranker-base**。在向量粗排后进行精排，有效解决“搜到了但相关性不高”的问题，显著减少大模型幻觉。
+
+### 4. 📝 沉浸式交互体验
+*   **精准溯源高亮**：支持 PDF/Word/TXT 等多种格式的原文级高亮定位。点击引用，弹窗自动滚动并高亮具体段落，所见即所得。
+*   **上下文记忆**：基于数据库持久化的会话管理，刷新页面不丢失。支持多轮对话，模型能精准理解“它”、“上面提到的”等指代词。
+*   **全格式支持**：集成 **PyMuPDF** 等高性能解析器，深度解析表格与复杂排版。
+
+### 5. 📊 管理驾驶舱 (Dashboard)
+*   提供可视化的**数据仪表盘**，管理员可实时监控知识库文档总量、近期活跃度趋势、文件类型分布及系统健康状态。
+
+---
+
 # 企业知识库智能问答系统
 
 一个基于 Vue 3 + AI 的企业级知识库管理系统，提供文档管理、智能问答、文件预览等完整功能。
@@ -49,7 +92,7 @@
 ## 🚀 快速开始
 
 ### 环境要求
-- Node.js >= 16.0.0
+- Node.js >= 16.0.0 (实际开发在v24.9.0)
 - npm >= 7.0.0
 
 ### 安装依赖
@@ -116,16 +159,22 @@ src/
 - 自适应布局和交互
 
 ## 🔧 部署
-搭配后端一起使用：https://github.com/rogers0602/llamaindex_rag
+搭配后端一起使用, 后端项目地址：[Enterprise RAG Knowledge Base (Backend)](https://github.com/rogers0602/llamaindex_rag)
 
 ### 代码规范
 - 使用 Vue 3 Composition API
 - 遵循 ESLint 代码规范
 - 组件使用 `<script setup>` 语法糖
 
-## 📄 许可证
+## 🧾 许可证与商业使用
+---
+本项目采用 **AGPL-3.0** 许可证，这意味着：
 
-本项目可以自由使用部署但是严禁商用售卖。
+ - 您可以自由地使用、修改和分发本项目，但必须遵守 AGPL-3.0 协议要求
+ - **闭源商用需要购买商业授权**
+ - 项目的**重要贡献者**可免费获得商业授权
+
+强烈建议优先考虑AGPL-3.0合规方案。如有**商业授权**疑问，请邮件联系作者
 
 ## 👨‍💻 作者
 
