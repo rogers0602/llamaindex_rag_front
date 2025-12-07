@@ -1,16 +1,36 @@
 ---
 
-# 🛡️ Enterprise RAG Knowledge Base (前端系统)
+# 🛡️ Enterprise RAG Knowledge Base (离线私有化版)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![LlamaIndex](https://img.shields.io/badge/LlamaIndex-0.10+-BC31EA.svg?style=flat)](https://www.llamaindex.ai/)
-[![Ollama](https://img.shields.io/badge/Ollama-0.3+-000000.svg?style=flat&logo=ollama&logoColor=white)](https://ollama.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+这是一个专为**数据安全敏感型企业**打造的 RAG（检索增强生成）知识库系统。
+本项目旨在解决企业内部知识管理的痛点，提供**从底层模型到上层 UI 的全链路私有化解决方案**，确保数据不出域，断网环境亦可全功能运行。
 
-> **🚀 一个专为数据安全敏感型企业打造的私有化 RAG（检索增强生成）知识库系统。**
-> 
-> 全链路离线运行，无需互联网连接。集成了 LDAP 统一认证、细粒度 RBAC 权限控制、多租户隔离、精准的文档溯源高亮以及可视化的数据仪表盘。
+## 🌟 核心亮点与技术选型
+
+### 1. 💯 极致的私有化与离线能力 (Offline & Privacy First)
+*   **无需联网**：系统内置所有依赖包与 AI 模型（Embedding/Rerank），支持在物理隔离的内网环境一键 Docker 部署。
+*   **数据安全**：所有数据（向量、文档、对话日志）均存储在本地 PostgreSQL，无第三方 API 调用风险。
+
+### 2. 🔐 严苛的权限隔离体系 (RBAC & Multi-Tenancy)
+*   **部门级隔离**：实现了基于 `Workspace` 的多租户逻辑。研发部的文档，财务部不可见，从底层向量检索阶段即进行物理/逻辑隔离。
+*   **无缝认证**：支持 **Local + LDAP/AD** 双模认证。企业域账号直接登录，自动同步组织架构，管理员可进行细粒度的人员与部门管理。
+
+### 3. 🧠 经过实战验证的模型组合 (Model Strategy)
+我们不盲目追求大参数，而是追求**效果与资源的最佳平衡**：
+*   **LLM (Ollama)**：选用 `Qwen2.5` 系列。在中文理解、指令遵循上表现优异，且通过 Ollama 部署可大幅降低显存门槛。
+*   **Embedding (Ollama/BGE-M3)**：选用 `BAAI/bge-m3`。
+    *   *选择理由*：支持 **8192** 超长上下文（优于 BERT 的 512），完美适配长文档切片；具备 SOTA 级别的多语言与中文检索能力。
+*   **Rerank (Local Python)**：内置 `BAAI/bge-reranker-base`。
+    *   *选择理由*：这是 RAG 精度的关键。在向量粗排后进行精排，能有效解决“搜到了但相关性不高”的问题，显著减少大模型幻觉。
+
+### 4. 📝 沉浸式交互体验 (UX & Feature)
+*   **精准溯源高亮**：不同于普通的“显示引用文件”，本系统实现了**PDF/TXT 原文级高亮定位**。点击引用，弹窗自动滚动并高亮具体的段落，所见即所得。
+*   **上下文记忆**：基于数据库持久化的会话管理，刷新不丢失。支持多轮对话，模型能理解“它”、“上面提到的”等指代词。
+*   **全格式支持**：集成了 PyMuPDF 等解析器，支持 PDF、Word、Excel、Markdown 等多种格式的深度解析与智能切片。
+
+### 5. 📊 数据洞察 (Dashboard)
+*   提供可视化的**管理仪表盘**，管理员可实时监控知识库文档总量、问答活跃度趋势、文件类型分布及系统健康状态。
+
 
 ---
 
