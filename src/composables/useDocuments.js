@@ -29,7 +29,7 @@ export function useDocuments() {
     isLoading.value = true
     try {
       // 构造请求 URL，带上 workspace_id 参数
-      const url = `http://localhost:8000/api/documents?workspace_id=${currentWorkspace.value.id}`
+      const url = `/api/documents?workspace_id=${currentWorkspace.value.id}`
       
       const res = await fetch(url, {
         method: 'GET',
@@ -65,7 +65,7 @@ export function useDocuments() {
     formData.append('is_public', isPublic) 
 
     try {
-      const res = await fetch('http://localhost:8000/api/documents/upload', {
+      const res = await fetch('/api/documents/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.value.token}`

@@ -177,7 +177,7 @@ const canDelete = (doc) => {
 const handleDelete = async (doc) => {
   if (!confirm(`确定要永久删除文档 "${doc.name}" 吗？`)) return
   try {
-    const res = await fetch(`http://localhost:8000/api/documents/${doc.id}`, {
+    const res = await fetch(`/api/documents/${doc.id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${user.value.token}` }
     })

@@ -105,7 +105,7 @@
   const loadFile = async () => {
     try {
       const wsId = props.docWorkspaceId || 'global'
-      const url = `http://localhost:8000/api/files/${props.fileName}?doc_workspace_id=${wsId}`
+      const url = `/api/files/${props.fileName}?doc_workspace_id=${wsId}`
       
       console.log('Requesting:', url) 
   

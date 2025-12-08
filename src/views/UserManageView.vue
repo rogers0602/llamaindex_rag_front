@@ -177,8 +177,8 @@
   const fetchData = async () => {
     const headers = { 'Authorization': `Bearer ${user.value.token}` }
     const [resU, resD] = await Promise.all([
-      fetch('http://localhost:8000/api/admin/users', { headers }),
-      fetch('http://localhost:8000/api/admin/departments', { headers })
+      fetch('/api/admin/users', { headers }),
+      fetch('/api/admin/departments', { headers })
     ])
     if(resU.ok) users.value = await resU.json()
     if(resD.ok) depts.value = await resD.json()
@@ -206,7 +206,7 @@
       department_id: form.department_id
     }
   
-    const res = await fetch('http://localhost:8000/api/admin/users', {
+    const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${user.value.token}`,
@@ -231,7 +231,7 @@
   const deleteUser = async (u) => {
     if(!confirm(`确定要删除用户 ${u.username} 吗？`)) return
     
-    const res = await fetch(`http://localhost:8000/api/admin/users/${u.id}`, {
+    const res = await fetch(`/api/admin/users/${u.id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${user.value.token}` }
     })

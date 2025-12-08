@@ -59,14 +59,14 @@
   const newDeptName = ref('')
   
   const fetchDepts = async () => {
-    const res = await fetch('http://localhost:8000/api/admin/departments', {
+    const res = await fetch('/api/admin/departments', {
       headers: { 'Authorization': `Bearer ${user.value.token}` }
     })
     if (res.ok) depts.value = await res.json()
   }
   
   const addDept = async () => {
-    const res = await fetch('http://localhost:8000/api/admin/departments', {
+    const res = await fetch('/api/admin/departments', {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${user.value.token}`,
@@ -88,7 +88,7 @@
     const msg = `⚠️ 危险操作！\n\n删除部门【${dept.name}】将同时删除该部门下的所有【${dept.user_count}名】员工！\n\n此操作不可恢复，确定要继续吗？`
     if (!confirm(msg)) return
   
-    const res = await fetch(`http://localhost:8000/api/admin/departments/${dept.id}`, {
+    const res = await fetch(`/api/admin/departments/${dept.id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${user.value.token}` }
     })

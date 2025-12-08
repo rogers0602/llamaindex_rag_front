@@ -135,7 +135,7 @@
   const fetchStats = async () => {
     if (!user.value.token) return
     try {
-      const res = await fetch('http://localhost:8000/api/dashboard/stats', {
+      const res = await fetch('/api/dashboard/stats', {
         headers: { 'Authorization': `Bearer ${user.value.token}` }
       })
       if (res.ok) {

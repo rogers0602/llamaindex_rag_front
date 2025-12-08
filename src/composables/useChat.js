@@ -33,7 +33,7 @@ export function useChat() {
   const fetchSessions = async () => {
     if (!user.value.token) return
     try {
-      const res = await fetch('http://localhost:8000/api/chat/sessions', {
+      const res = await fetch('/api/chat/sessions', {
         headers: { 'Authorization': `Bearer ${user.value.token}` }
       })
       if (res.ok) {
@@ -67,7 +67,7 @@ export function useChat() {
     localStorage.setItem('last_session_id', sessionId)
     
     try {
-      const res = await fetch(`http://localhost:8000/api/chat/sessions/${sessionId}`, {
+      const res = await fetch(`/api/chat/sessions/${sessionId}`, {
         headers: { 'Authorization': `Bearer ${user.value.token}` }
       })
       const data = await res.json()
@@ -117,7 +117,7 @@ export function useChat() {
     try {
       if (!user.value.token) throw new Error("请先登录")
 
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ export function useChat() {
     if (!sessionId) return
     
     try {
-      const res = await fetch(`http://localhost:8000/api/chat/sessions/${sessionId}`, {
+      const res = await fetch(`/api/chat/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${user.value.token}` }
       })
